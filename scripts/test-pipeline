@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+scriptsdir=$(cd "$(dirname "$0")"; pwd)
+testdir=$(cd "$(dirname "$0")"/../test; pwd)
+inputDir="$testdir/input"
+outputDir="$testdir/output"
+
+$scriptsdir/build-pipeline
+rm $outputDir/*
+
+docker run --rm --volume ${outputDir}:/output --volume ${inputDir}:/input kratix-workshop/elastic-pipeline:dev
