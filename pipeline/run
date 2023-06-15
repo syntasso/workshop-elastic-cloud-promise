@@ -33,4 +33,9 @@ find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.an
 echo "Copying files to /output..."
 find /pipeline/to-deploy -name \*.yaml -exec cp {} /output \;
 
+if ${enableDataCollection}; then
+  echo "Setting additional cluster selectors: pvCapacity=large"
+  echo "pvCapacity: large" > /metadata/cluster-selectors.yaml
+fi
+
 echo "Done"
