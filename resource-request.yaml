@@ -1,7 +1,0 @@
-apiVersion: workshop.kratix.io/v1alpha1
-kind: elastic-cloud
-metadata:
-  name: example
-  namespace: default
-spec:
-  enableDataCollection: true
