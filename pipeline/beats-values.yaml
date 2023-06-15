@@ -1,6 +1,6 @@
 eck-beats:
   enabled: true
-  name: metricbeat
+  fullnameOverride: NAME
   spec:
     type: metricbeat
     version: 8.9.0-SNAPSHOT
