@@ -1,0 +1,20 @@
+eck-beats:
+  enabled: true
+  fullnameOverride: NAME
+  spec:
+    type: metricbeat
+    version: 8.9.0-SNAPSHOT
+    elasticsearchRef:
+      name: NAME
+    kibanaRef:
+      name: NAME
+    daemonSet:
+      podTemplate:
+        spec:
+          containers:
+            - args:
+                - -e
+                - -c
+                - /etc/beat.yml
+                - -system.hostfs=/hostfs
+              name: metricbeat

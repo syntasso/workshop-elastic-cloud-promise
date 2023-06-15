@@ -1,0 +1,19 @@
+eck-elasticsearch:
+  fullnameOverride: NAME
+eck-kibana:
+  fullnameOverride: NAME
+  spec:
+    config:
+      csp:
+        strict: false
+    count: 1
+    elasticsearchRef:
+      name: NAME
+    http:
+      tls:
+        selfSignedCertificate:
+          disabled: true
+      service:
+        spec:
+          type: NodePort
+          ports: [{nodePort: NODEPORT, port: 5601}]
