@@ -6,6 +6,14 @@ mkdir -p to-deploy
 export name="$(yq eval '.metadata.name' /input/object.yaml)"
 export enableDataCollection="$(yq eval '.spec.enableDataCollection' /input/object.yaml)"
 
+echo "Downloading CRDS..."
+curl --silent --location --output to-deploy/elastic-crds.yaml \
+    https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
+
+echo "Downloading Operator..."
+curl --silent --location --output to-deploy/elastic-operator.yaml \
+    https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
+
 echo "Generate ECK requests..."
 # Only set the beats value file if data collection is enabled
 valuesFile=''
