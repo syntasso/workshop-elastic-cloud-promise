@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+mkdir -p to-deploy
+export name="$(yq eval '.metadata.name' /kratix/input/object.yaml)"
+export enableDataCollection="$(yq eval '.spec.enableDataCollection' /kratix/input/object.yaml)"
+
+echo "Downloading CRDS..."
+curl --silent --location --output to-deploy/elastic-crds.yaml \
+    https://download.elastic.co/downloads/eck/2.8.0/crds.yaml
+
+echo "Downloading Operator..."
+curl --silent --location --output to-deploy/elastic-operator.yaml \
+    https://download.elastic.co/downloads/eck/2.8.0/operator.yaml
+
+echo "Generate ECK requests..."
+# Only set the beats value file if data collection is enabled
+valuesFile=''
+if $enableDataCollection; then
+  sed "s/NAME/${name}/g" beats-values.yaml > beats-final-values.yaml
+  valuesFile='--values beats-final-values.yaml'
+fi
+
+nodePort="$(echo "${name}" | md5sum | grep -Eo "[[:digit:]]{3}" | head -n1)"
+nodePort=$(( 30000 + nodePort ))
+sed "s/NODEPORT/${nodePort}/g" default-config.yaml | sed "s/NAME/${name}/g" > default-config-final-values.yaml
+
+helm template $name eck-stack \
+  $valuesFile \
+  --values default-config-final-values.yaml \
+  --repo https://helm.elastic.co \
+  --output-dir to-deploy
+
+echo "Adding namespaces to all helm output files..."
+find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'select(.metadata | has("namespace") | not).metadata.namespace |= "default"' {} \;
+
+echo "Removing enterprise annotation..."
+find /pipeline/to-deploy/eck-stack -name \*.yaml   -exec yq -i 'del(.metadata.annotations["eck.k8s.elastic.co/license"])' {} \;
+
+
+echo "Copying files to /kratix/output..."
+find /pipeline/to-deploy -name \*.yaml -exec cp {} /kratix/output \;
+
+if [ -f /kratix/output/beats.yaml ]; then
+  head -n -1 /kratix/output/beats.yaml > temp.yaml ; mv temp.yaml /kratix/output/beats.yaml
+fi
+
+echo "Done"

@@ -1,0 +1,65 @@
+---
+# Source: eck-stack/charts/eck-beats/templates/beats.yaml
+apiVersion: beat.k8s.elastic.co/v1beta1
+kind: Beat
+metadata:
+  name: example
+  labels:
+    helm.sh/chart: eck-beats-0.7.0
+    app.kubernetes.io/name: eck-beats
+    app.kubernetes.io/instance: example
+    app.kubernetes.io/managed-by: Helm
+  annotations: {}
+  namespace: default
+spec:
+  version: 8.9.0
+  type: metricbeat
+  config:
+    filebeat.inputs: []
+    metricbeat:
+      modules:
+        - metricsets:
+            - cpu
+            - load
+            - memory
+            - network
+            - process
+            - process_summary
+          module: system
+          period: 10s
+          process:
+            include_top_n:
+              by_cpu: 5
+              by_memory: 5
+          processes:
+            - .*
+  daemonSet:
+    podTemplate:
+      spec:
+        containers:
+          - args:
+              - -e
+              - -c
+              - /etc/beat.yml
+              - -system.hostfs=/hostfs
+            name: metricbeat
+        initContainers:
+          - command:
+              - sh
+              - -c
+              - chown -R 1000:1000 /usr/share/beat/data
+            image: docker.elastic.co/beats/filebeat:8.7.0
+            name: permissions
+            securityContext:
+              runAsUser: 0
+            volumeMounts:
+              - mountPath: /usr/share/beat/data
+                name: beat-data
+        securityContext:
+          fsGroup: 1000
+          runAsGroup: 1000
+          runAsUser: 1000
+  elasticsearchRef:
+    name: example
+  kibanaRef:
+    name: example

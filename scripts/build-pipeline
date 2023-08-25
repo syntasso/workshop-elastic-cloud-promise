@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+set -eu -o pipefail
+
+testdir=$(cd "$(dirname "$0")"/../test; pwd)
+
+docker build --tag kratix-workshop/elastic-pipeline:dev $testdir/../pipeline
+kind load docker-image --name platform kratix-workshop/elastic-pipeline:dev
