@@ -1,0 +1,4 @@
+message: "Instance example provisioned with preconfigured system metrics"
+initialLoginDetails:
+    username: "elastic"
+    passwordSecretName: "example-es-elastic-user"

@@ -43,4 +43,11 @@ if ${enableDataCollection}; then
   echo "[{matchLabels: { pvCapacity: large }}]" > /kratix/metadata/destination-selectors.yaml
 fi
 
+cat <<EOF > /kratix/metadata/status.yaml
+message: "Instance ${name} provisioned with preconfigured system metrics"
+initialLoginDetails:
+    username: "elastic"
+    passwordSecretName: "${name}-es-elastic-user"
+EOF
+
 echo "Done"
