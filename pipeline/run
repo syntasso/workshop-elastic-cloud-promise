@@ -38,4 +38,9 @@ if [ -f /kratix/output/beats.yaml ]; then
   head -n -1 /kratix/output/beats.yaml > temp.yaml ; mv temp.yaml /kratix/output/beats.yaml
 fi
 
+if ${enableDataCollection}; then
+  echo "Setting additional cluster selectors: pvCapacity=large"
+  echo "[{matchLabels: { pvCapacity: large }}]" > /kratix/metadata/destination-selectors.yaml
+fi
+
 echo "Done"
